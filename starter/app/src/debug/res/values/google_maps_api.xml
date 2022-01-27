@@ -1,4 +1,8 @@
 <resources>
 <!--    TODO: Before you run your application, you need a Google Maps API key.-->
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false"></string>
+
+    <!--
+      https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=E2:C2:D5:63:4C:02:3E:3F:FB:87:F1:D7:3A:19:80:8E:E9:9D:A4:1E%3Bcom.udacity.project4 -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCha4kPQqnI7-3hHX1T1yYJ_SafDlxYjMo</string>
 </resources>
+
