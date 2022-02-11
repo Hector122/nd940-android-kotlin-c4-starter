@@ -12,6 +12,9 @@ class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        
+        
         setContentView(R.layout.activity_authentication)
 //         TODO: Implement the create account and sign in using FirebaseUI, use sign in using email and sign in using Google
 
