@@ -4,6 +4,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -19,6 +20,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.*
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     companion object {
@@ -49,10 +51,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         //COMPLETED: add the map setup implementation
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        
-//        TODO: add style to the map
-//        TODO: put a marker to location that the user selected
-
 
 //        TODO: call this function after the user confirms on the selected location
         onLocationSelected()
@@ -117,6 +115,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         
         //Get user last know location.
         moveToDeviceLocation()
+        
+        // add style to the map
+        setMapStyle(map)
+        
+        // Completed: put a marker to location that the user selected
+        setMapLongClick(map)
+        setPoiClick(map)
     }
     
     private fun enableMyLocation() {
@@ -171,5 +176,56 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private fun isPermissionGranted(): Boolean {
         return ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+    
+    /**
+     * Add a Marker on long click in the map.
+     */
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { latLng ->
+            //Remove previous market.
+            map.clear()
+            
+            // A Snippet is Additional text that's displayed below the title
+            val snippet = String.format(Locale.getDefault(),
+                    getString(R.string.lat_long_snippet),
+                    latLng.latitude,
+                    latLng.longitude)
+            
+            //Add marker
+            map.addMarker(MarkerOptions().position(latLng)
+                .icon(BitmapDescriptorFactory.defaultMarker())
+                .title(getString(R.string.dropped_pin))
+                .snippet(snippet))
+        }
+    }
+    
+    /**
+     *  Add points of interest (POIs)
+     */
+    private fun setPoiClick(map: GoogleMap) {
+        map.setOnPoiClickListener { pointOfInterest ->
+            //Remove previous market.
+            map.clear()
+            
+            val poiMarker = map.addMarker(MarkerOptions().position(pointOfInterest.latLng)
+                .title(pointOfInterest.name))
+            
+            //immediately show the info window.
+            poiMarker.showInfoWindow()
+        }
+    }
+    
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            val success = map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(),
+                    R.raw.map_style))
+            
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
+        }
     }
 }
