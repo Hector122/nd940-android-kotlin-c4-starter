@@ -26,7 +26,7 @@ import com.udacity.project4.locationreminders.RemindersActivity
 class AuthenticationActivity : AppCompatActivity() {
     
     companion object {
-        const val TAG = "AuthenticationActivity"
+        private val TAG = AuthenticationActivity::class.java.simpleName
         const val SIGN_IN_RESULT_CODE = 1001
     }
     
@@ -81,5 +81,7 @@ class AuthenticationActivity : AppCompatActivity() {
     private fun startRemindersActivity() {
         val intent = Intent(this, RemindersActivity::class.java)
         startActivity(intent)
+        
+        finish()
     }
 }
