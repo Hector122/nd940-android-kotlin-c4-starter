@@ -116,10 +116,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
     //Firebase
-    implementation 'com.firebaseui:firebase-ui-auth:5.0.0'
-
-//    def multidex_version = "2.0.1"
-//    implementation "androidx.multidex:multidex:$multidex_version"
-    implementation 'com.android.support:multidex:1.0.3'
-
+    implementation "com.firebaseui:firebase-ui-auth:$firebaseUi"
+    //Multidex
+    implementation "com.android.support:multidex:$multidexVersion"
 }
