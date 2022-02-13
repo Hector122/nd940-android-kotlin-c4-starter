@@ -36,31 +36,24 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     override fun onHandleWork(intent: Intent) {
         //COMPLETED: handle the geofencing transition events and
         // send a notification to the user when he enters the geofence area
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        
+        val geofencingEvent  = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent.hasError()) {
             val errorMessage = errorMessage(baseContext, geofencingEvent.errorCode)
             Log.e(TAG, errorMessage)
             return
         }
         
+        //COMPLETED call @sendNotification
         if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            Log.v(TAG, baseContext.getString(R.string.geofence_entered))
-            //COMPLETED call @sendNotification
             sendNotification(geofencingEvent.triggeringGeofences)
         }
     }
     
     //COMPLETED: get the request id of the current geofence
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        if (triggeringGeofences.isEmpty()) {
-            Log.e(TAG, "No Geofence Trigger Found! Abort mission!")
-            return
-        }
-        
         val requestId = triggeringGeofences[0].requestId
         
-        //Get the local repository instance
+        // Get the local repository instance
         val remindersLocalRepository: RemindersLocalRepository by inject()
 //        Interaction to the repository has to be through a coroutine scope
         CoroutineScope(coroutineContext).launch(SupervisorJob()) {

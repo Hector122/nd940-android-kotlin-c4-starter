@@ -140,9 +140,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     
     private fun enableMyLocation() {
         if (isPermissionGranted()) {
-            if (ActivityCompat.checkSelfPermission(requireContext(),
+            if (ActivityCompat.checkSelfPermission(requireActivity(),
                         Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        requireContext(),
+                        requireActivity(),
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissions()
@@ -171,7 +171,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         // if location not enable get out.
         if (!map.isMyLocationEnabled) return
         
-        val fusedLocationProviderClient = FusedLocationProviderClient(requireContext())
+        val fusedLocationProviderClient = FusedLocationProviderClient(requireActivity())
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnCompleteListener(requireActivity()) { task ->
             if (task.isSuccessful && task.result != null) {
@@ -186,7 +186,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
     
     private fun isPermissionGranted(): Boolean {
-        return ContextCompat.checkSelfPermission(requireContext(),
+        return ContextCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
     
@@ -209,6 +209,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.defaultMarker())
                 .title(getString(R.string.dropped_pin))
                 .snippet(snippet))
+            
+            this.pointOfInterest = PointOfInterest(latLng, latLng.describeContents().toString() , snippet)
         }
     }
     

@@ -23,6 +23,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
+import com.udacity.project4.locationreminders.geofence.ACTION_GEOFENCE_EVENT
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -40,8 +41,6 @@ class SaveReminderFragment : BaseFragment() {
     
     companion object {
         private val TAG = SaveReminderFragment::class.java.simpleName
-        
-        const val ACTION_GEOFENCE_EVENT = "SaveReminderFragment.action.ACTION_GEOFENCE_EVENT"
         const val GEOFENCE_RADIUS_IN_METERS = 100f
     }
     
@@ -59,7 +58,7 @@ class SaveReminderFragment : BaseFragment() {
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(requireActivity(), GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
-        PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        PendingIntent.getBroadcast(requireActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
     
     override fun onCreateView(
@@ -270,19 +269,19 @@ class SaveReminderFragment : BaseFragment() {
         
         
         //Add geofence
-        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
-            ?.run {
-                addOnSuccessListener {
-                    _viewModel.showToast.value = getString(R.string.geofence_entered)
-                    
-                    Log.e(TAG, geofence.requestId)
-                }
-                addOnFailureListener {
-                    if ((it.message != null)) {
-                        _viewModel.showToast.value = getString(R.string.error_adding_geofence)
-                        Log.w(TAG, it.message.toString())
-                    }
+        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
+            addOnSuccessListener {
+                // Geofences added
+                _viewModel.showToast.value = getString(R.string.geofence_entered)
+                Log.e(TAG, geofence.requestId)
+            }
+            addOnFailureListener {
+               // Failed to add geofences
+                if ((it.message != null)) {
+                    _viewModel.showToast.value = getString(R.string.error_adding_geofence)
+                    Log.w(TAG, it.message.toString())
                 }
             }
+        }
     }
 }
