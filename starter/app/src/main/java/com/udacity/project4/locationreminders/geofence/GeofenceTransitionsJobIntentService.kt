@@ -55,6 +55,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
         val requestId = triggeringGeofences[0].requestId
         
         // Get the local repository instance
+        // fix bug reference: https://github.com/udacity/nd940-android-kotlin-c4-starter/pull/2
         val remindersLocalRepository: ReminderDataSource by inject()
 //        Interaction to the repository has to be through a coroutine scope
         CoroutineScope(coroutineContext).launch(SupervisorJob()) {
