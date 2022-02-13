@@ -16,21 +16,23 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
+import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import kotlinx.android.synthetic.main.fragment_save_reminder.*
 import org.koin.android.ext.android.inject
 import java.util.*
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     companion object {
         private val TAG = SelectLocationFragment::class.java.simpleName
-        private val REQUEST_LOCATION_PERMISSION = 1
+        private const val REQUEST_LOCATION_PERMISSION = 1
         private const val ZOOM_LEVEL = 15f
     }
     
-    // Google map
     private lateinit var map: GoogleMap
+    private var pointOfInterest: PointOfInterest? = null
     
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -38,7 +40,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
         
@@ -52,9 +54,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-//        TODO: call this function after the user confirms on the selected location
-        onLocationSelected()
-        
+//        Completed: call this function after the user confirms on the selected location
+        binding.buttonSave.setOnClickListener {
+            onLocationSelected()
+        }
         return binding.root
     }
     
@@ -76,9 +79,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
     
     private fun onLocationSelected() {
-        //        TODO: When the user confirms on the selected location,
+        //        COMPLETED: When the user confirms on the selected location,
         //         send back the selected location details to the view model
         //         and navigate back to the previous fragment to save the reminder and add the geofence
+        if (pointOfInterest != null) {
+            _viewModel.reminderSelectedLocationStr.value = pointOfInterest?.name
+            _viewModel.longitude.value = pointOfInterest?.latLng?.longitude
+            _viewModel.latitude.value = pointOfInterest?.latLng?.latitude
+            _viewModel.selectedPOI.value = pointOfInterest
+            
+            //navigate back
+            _viewModel.navigationCommand.value = NavigationCommand.Back
+        } else {
+            _viewModel.showSnackBar.value = getString(R.string.select_poi)
+        }
     }
     
     
@@ -87,7 +101,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
     
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        // Completed: Change the map type based on the user's selection.
+        // COMPLETED: Change the map type based on the user's selection.
         R.id.normal_map -> {
             map.mapType = GoogleMap.MAP_TYPE_NORMAL
             true
@@ -119,7 +133,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         // add style to the map
         setMapStyle(map)
         
-        // Completed: put a marker to location that the user selected
+        // COMPLETED: put a marker to location that the user selected
         setMapLongClick(map)
         setPoiClick(map)
     }
@@ -131,23 +145,21 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                         requireContext(),
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                requestPermissions()
                 return
             }
-            
+    
             // Enable location
             map.isMyLocationEnabled = true
         } else {
-            ActivityCompat.requestPermissions(requireActivity(),
-                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_LOCATION_PERMISSION)
+            requestPermissions()
         }
+    }
+    
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION)
     }
     
     
@@ -162,7 +174,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         val fusedLocationProviderClient = FusedLocationProviderClient(requireContext())
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnCompleteListener(requireActivity()) { task ->
-            if (task.isSuccessful) {
+            if (task.isSuccessful && task.result != null) {
                 // Set the map's camera position to the last current location of the device.
                 val lastKnownLocation = LatLng(task.result!!.latitude, task.result!!.longitude)
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLocation, ZOOM_LEVEL))
@@ -208,6 +220,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             //Remove previous market.
             map.clear()
             
+            //set global POI
+            this.pointOfInterest = pointOfInterest
+            
+            //set POI data to UI
             val poiMarker = map.addMarker(MarkerOptions().position(pointOfInterest.latLng)
                 .title(pointOfInterest.name))
             
