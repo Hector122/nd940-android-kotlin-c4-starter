@@ -2,9 +2,11 @@ package com.udacity.project4.locationreminders.savereminder
 
 
 import android.content.Context
+import android.provider.Settings.Global.getString
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.base.Joiner.on
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
@@ -17,6 +19,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 
 
 @ExperimentalCoroutinesApi
@@ -33,8 +36,8 @@ class SaveReminderViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
     
-    //@Mock
-   // var context: Context? = null
+    @Mock
+    private lateinit var mockContext: Context
     
     @Before
     fun setUpViewModel() {
@@ -101,9 +104,7 @@ class SaveReminderViewModelTest {
         saveReminderViewModel.validateAndSaveReminder(reminder)
     
         //THEN
-//        val value = saveReminderViewModel.showToast.getOrAwaitValue()
-//        assertThat(value, `is`(context?.getString(R.string.reminder_saved)))
+        val value = saveReminderViewModel.showToast.getOrAwaitValue()
+        assertThat(value, `is`("Reminder Saved !"))
     }
-    
-    
 }
