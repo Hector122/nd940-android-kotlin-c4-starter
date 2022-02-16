@@ -1,24 +1,23 @@
 package com.udacity.project4.locationreminders.savereminder
 
+
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.util.getOrAwaitValue
-
-import com.udacity.project4.utils.SingleLiveEvent
-
-
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.bouncycastle.asn1.crmf.EncryptedValue
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
+import org.mockito.Mock
+
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -34,6 +33,9 @@ class SaveReminderViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
     
+    //@Mock
+   // var context: Context? = null
+    
     @Before
     fun setUpViewModel() {
         fakeDataSource = FakeDataSource()
@@ -48,14 +50,21 @@ class SaveReminderViewModelTest {
         }
     }
     
+    @After
+    fun tearDown() {
+        // to remove error A Koin Application has already been started
+        // after the first text run.
+        stopKoin()
+    }
+    
     @Test
-    fun saveReminder_noEnterTitle_showToast() {
+    fun saveReminder_noEnterTitle_showSnack() {
         //GIVEN
         val reminder = ReminderDataItem(title = "",
-                description = "description 1",
-                location = "Location Name",
-                latitude = 37.8199,
-                longitude = -122.4783)
+                description = "description 2",
+                location = "Location Name 2",
+                latitude = 57.8199,
+                longitude = -622.4783)
         //WHEN
         saveReminderViewModel.validateAndSaveReminder(reminder)
         
@@ -65,17 +74,35 @@ class SaveReminderViewModelTest {
     }
     
     @Test
-    fun saveReminder_noEnterLocation_showToast() {
+    fun saveReminder_noEnterLocation_showSnack() {
+        //GIVEN
+        val reminder = ReminderDataItem(title = "Title 1",
+                description = "description 1",
+                location = "",
+                latitude = 37.8199,
+                longitude = -122.4783)
         //WHEN
-        
+        saveReminderViewModel.validateAndSaveReminder(reminder)
+    
         //THEN
+        val value = saveReminderViewModel.showSnackBarInt.getOrAwaitValue()
+        assertThat(value, `is`(R.string.err_select_location))
     }
     
     @Test
-    fun saveReminder_successful() {
+    fun saveReminder_successful_showToast() {
+        //GIVEN
+        val reminder = ReminderDataItem(title = "Title 1",
+                description = "description 1",
+                location = "Location Name",
+                latitude = 37.8199,
+                longitude = -122.4783)
         //WHEN
-        
+        saveReminderViewModel.validateAndSaveReminder(reminder)
+    
         //THEN
+//        val value = saveReminderViewModel.showToast.getOrAwaitValue()
+//        assertThat(value, `is`(context?.getString(R.string.reminder_saved)))
     }
     
     
