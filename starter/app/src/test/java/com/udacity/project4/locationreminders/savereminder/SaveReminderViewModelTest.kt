@@ -64,10 +64,10 @@ class SaveReminderViewModelTest {
     fun saveReminder_noEnterTitle_showSnack() {
         //GIVEN
         val reminder = ReminderDataItem(title = "",
-                description = "description 2",
-                location = "Location Name 2",
-                latitude = 57.8199,
-                longitude = -622.4783)
+                description = "description 1",
+                location = "Location Name 1",
+                latitude = 37.8199,
+                longitude = -122.4783)
         //WHEN
         saveReminderViewModel.validateAndSaveReminder(reminder)
         

@@ -29,7 +29,7 @@ import org.mockito.ArgumentMatchers.matches
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
     
-    //TODO: provide testing to the RemindersListViewModel and its live data objects
+    //COMPLETED: provide testing to the RemindersListViewModel and its live data objects
 // Use a fake repository to be injected into the viewmodel
     private lateinit var fakeDataSource: FakeDataSource
     

@@ -27,7 +27,7 @@ import org.junit.Test
 @SmallTest
 class RemindersDaoTest {
     
-    //    TODO: Add testing implementation to the RemindersDao.kt
+    //    COMPLETED: Add testing implementation to the RemindersDao.kt
 // Executes each task synchronously(same time / parallel) using Architecture Components.
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
@@ -57,10 +57,12 @@ class RemindersDaoTest {
                 longitude = -122.4783)
         
         //insert reminder
-        database.reminderDao().saveReminder(reminder)
+        database.reminderDao()
+            .saveReminder(reminder)
         
         // WHEN
-        val loaded = database.reminderDao().getReminderById(reminder.id)
+        val loaded = database.reminderDao()
+            .getReminderById(reminder.id)
         
         // THEN
         assertThat<ReminderDTO>(loaded as ReminderDTO, notNullValue())
@@ -73,21 +75,24 @@ class RemindersDaoTest {
     }
     
     @Test
-    fun deleteAllReminder() = runBlockingTest{
+    fun deleteAllReminder() = runBlockingTest {
         // GIVEN
         val reminder = ReminderDTO(title = "Title test dao",
                 description = "description dao",
                 location = "Location dao",
                 latitude = 37.8199,
                 longitude = -122.4783)
-    
-        database.reminderDao().saveReminder(reminder)
+        
+        database.reminderDao()
+            .saveReminder(reminder)
         
         // WHEN
-        database.reminderDao().deleteAllReminders()
+        database.reminderDao()
+            .deleteAllReminders()
         
         //THEN
-        val reminders = database.reminderDao().getReminders()
+        val reminders = database.reminderDao()
+            .getReminders()
         assertThat(reminders.size, `is`(0))
     }
 }

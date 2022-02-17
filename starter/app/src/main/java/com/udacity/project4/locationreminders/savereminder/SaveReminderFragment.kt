@@ -82,7 +82,7 @@ class SaveReminderFragment : BaseFragment() {
             _viewModel.navigationCommand.value =
                 NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToSelectLocationFragment())
         }
-    
+        
         //init geofence client
         geofencingClient = LocationServices.getGeofencingClient(requireActivity())
         
@@ -100,11 +100,12 @@ class SaveReminderFragment : BaseFragment() {
                     latitude = latitude,
                     longitude = longitude)
             
-            // 1) add a geofencing request
-            
-            addGeofenceForReminder(reminderDataItem)
-            //   2) save the reminder to the local db
-            _viewModel.validateAndSaveReminder(reminderDataItem)
+            if (_viewModel.validateEnteredData(reminderDataItem)) {
+                //  1) add a geofencing request
+                addGeofenceForReminder(reminderDataItem)
+                //  2) save the reminder to the local db
+                _viewModel.saveReminder(reminderDataItem)
+            }
         }
     }
     
@@ -129,10 +130,7 @@ class SaveReminderFragment : BaseFragment() {
         //permission request was cancelled or
         // it means that the user denied foreground permissions. or
         //is denied it means that the device is running API 29 or above and that background permissions were denied.
-        if (grantResults.isEmpty()
-            || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED
-            || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
-                    && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)) {
+        if (grantResults.isEmpty() || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)) {
             
             //show explanation
             //_viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
@@ -170,10 +168,12 @@ class SaveReminderFragment : BaseFragment() {
       *  the opportunity to turn on location services within our app.
       */
     private fun checkDeviceLocationSettingsAndStartGeofence(resolve: Boolean = true) {
-        val locationRequest = LocationRequest.create().apply {
+        val locationRequest = LocationRequest.create()
+            .apply {
                 priority = LocationRequest.PRIORITY_LOW_POWER
             }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
         
         // get the Settings Client
         val settingsClient = LocationServices.getSettingsClient(requireActivity())
@@ -269,19 +269,20 @@ class SaveReminderFragment : BaseFragment() {
         
         
         //Add geofence
-        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
-            addOnSuccessListener {
-                // Geofences added
-                //_viewModel.showToast.value = getString(R.string.geofence_entered)
-                Log.i(TAG, geofence.requestId)
-            }
-            addOnFailureListener {
-               // Failed to add geofences
-                if ((it.message != null)) {
-                  //  _viewModel.showToast.value = getString(R.string.error_adding_geofence)
-                    Log.w(TAG, it.message.toString())
+        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)
+            ?.run {
+                addOnSuccessListener {
+                    // Geofences added
+                    //_viewModel.showToast.value = getString(R.string.geofence_entered)
+                    Log.i(TAG, geofence.requestId)
+                }
+                addOnFailureListener {
+                    // Failed to add geofences
+                    if ((it.message != null)) {
+                        //  _viewModel.showToast.value = getString(R.string.error_adding_geofence)
+                        Log.w(TAG, it.message.toString())
+                    }
                 }
             }
-        }
     }
 }
