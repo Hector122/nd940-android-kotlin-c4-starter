@@ -3,9 +3,13 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Fragment
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.*
 import androidx.core.app.ActivityCompat
@@ -14,6 +18,8 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -63,17 +69,37 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     
     // Callback for the result from requesting permissions.
     // This method is invoked for every call on requestPermissions(android.app.Activity, String[], int).
+    
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // Check if location permissions are granted and if so enable the
         // location data layer.
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.size > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                enableMyLocation()
+        when (requestCode) {
+            REQUEST_LOCATION_PERMISSION -> {
+                if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    enableMyLocation()
+                } else {
+                    //COMPLETED:
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    Snackbar.make(requireView(),
+                            R.string.permission_denied_explanation,
+                            Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.settings) {
+                            // Displays App settings screen.
+                            startActivity(Intent().apply {
+                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            })
+                        }
+                        .show()
+                }
             }
         }
     }
@@ -139,17 +165,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
     
     private fun enableMyLocation() {
-        if (isPermissionGranted()) {
-            if (ActivityCompat.checkSelfPermission(requireActivity(),
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        requireActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissions()
-                return
-            }
-    
-            // Enable location
+        if (ContextCompat.checkSelfPermission(requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
             map.isMyLocationEnabled = true
         } else {
             requestPermissions()
@@ -157,8 +175,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
     
     private fun requestPermissions() {
-        ActivityCompat.requestPermissions(requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION)
     }
     
@@ -185,11 +202,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
     
-    private fun isPermissionGranted(): Boolean {
-        return ContextCompat.checkSelfPermission(requireActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    }
-    
     /**
      * Add a Marker on long click in the map.
      */
@@ -210,7 +222,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 .title(getString(R.string.dropped_pin))
                 .snippet(snippet))
             
-            this.pointOfInterest = PointOfInterest(latLng, latLng.describeContents().toString() , snippet)
+            this.pointOfInterest = PointOfInterest(latLng,
+                    latLng.describeContents()
+                        .toString(),
+                    snippet)
         }
     }
     
