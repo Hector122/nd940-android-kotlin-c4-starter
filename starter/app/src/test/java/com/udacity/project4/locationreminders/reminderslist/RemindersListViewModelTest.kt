@@ -1,22 +1,17 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.udacity.project4.R
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
-import com.udacity.project4.locationreminders.data.dto.ReminderDTO
-import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.locationreminders.util.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.IsNot
+import org.hamcrest.core.IsEqual
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -62,6 +57,19 @@ class RemindersListViewModelTest {
         // after the first text run.
         stopKoin()
     }
+    @Test
+    fun shouldReturnError() = mainCoroutineRule.runBlockingTest {
+        //GIVE
+        fakeDataSource.setShouldReturnError(true)
+    
+        //WHEN
+        remindersListViewModel.loadReminders()
+    
+        //THEN
+        val snackbarText = remindersListViewModel.showSnackBar.getOrAwaitValue()
+        assertThat(snackbarText, IsEqual("Test exception/getReminders"))
+    }
+    
     
     @Test
     fun loadReminders_emptyList_showNoDataTrue() = runBlocking {
@@ -76,7 +84,7 @@ class RemindersListViewModelTest {
     }
     
     @Test
-    fun loadReminders_loading_showLoadingAndShowNoData() {
+    fun check_loading() = mainCoroutineRule.runBlockingTest {
         // GIVEN
         mainCoroutineRule.pauseDispatcher()//begin
         remindersListViewModel.loadReminders()

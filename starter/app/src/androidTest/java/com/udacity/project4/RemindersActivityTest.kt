@@ -76,7 +76,7 @@ class RemindersActivityTest :
     }
     
     
-    //    TODO: add End to End testing to the app
+    //    COMPLETED: add End to End testing to the app
     private val dataBindingIdlingResource = DataBindingIdlingResource()
     
     @Before
@@ -182,7 +182,8 @@ class RemindersActivityTest :
     
         // When using ActivityScenario.launch(), always call close().
         activityScenario.close()
-        // TODO: Delay
+        
+        // Delay
         runBlocking {
             delay(2000)
         }

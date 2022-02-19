@@ -11,8 +11,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
 import org.junit.runner.RunWith
@@ -72,5 +71,14 @@ class RemindersLocalRepositoryTest {
         Assert.assertThat(result.data.location, `is`(reminder.location))
         Assert.assertThat(result.data.latitude, `is`(reminder.latitude))
         Assert.assertThat(result.data.longitude, `is`(reminder.longitude))
+    }
+    
+    @Test
+    fun getReminderById_notDataFound() = runBlocking{
+        //WHEN
+        val reminder = localDataSource.getReminder("616") as Result.Error
+        
+        Assert.assertThat(reminder.message, notNullValue())
+        Assert.assertThat(reminder.message, `is`("Reminder not found!"))
     }
 }
