@@ -61,7 +61,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
 //        Completed: call this function after the user confirms on the selected location
-        binding.buttonSave.setOnClickListener {
+        binding.saveLocation.setOnClickListener {
             onLocationSelected()
         }
         return binding.root

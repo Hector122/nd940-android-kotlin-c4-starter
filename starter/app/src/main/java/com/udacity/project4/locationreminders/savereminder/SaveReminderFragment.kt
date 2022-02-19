@@ -126,14 +126,18 @@ class SaveReminderFragment : BaseFragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        
+        if(requestCode == REQUEST_TURN_DEVICE_LOCATION_ON){
+            checkDeviceLocationSettingsAndStartGeofence(false)
+        }
         //permission request was cancelled or
         // it means that the user denied foreground permissions. or
         //is denied it means that the device is running API 29 or above and that background permissions were denied.
-        if (grantResults.isEmpty() || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)) {
+        if (grantResults.isEmpty()
+            || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED
+            || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+                    && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)) {
             
             //show explanation
-            //_viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
             showSnackBarExplanation()
         } else {
             //permissions have been granted
@@ -202,9 +206,11 @@ class SaveReminderFragment : BaseFragment() {
                     .show()
             }
         }
+        
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful) {
                 Log.d(TAG, "Successful location setting response")
+                // device location enabled
             }
         }
     }
