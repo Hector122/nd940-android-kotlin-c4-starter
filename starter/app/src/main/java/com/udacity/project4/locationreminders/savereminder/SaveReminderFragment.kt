@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
@@ -98,12 +99,11 @@ class SaveReminderFragment : BaseFragment() {
                     location = location,
                     latitude = latitude,
                     longitude = longitude)
-            
+    
+            //  1) add a geofencing request
+            //  2) save the reminder to the local db
             if (_viewModel.validateEnteredData(reminderDataItem)) {
-                //  1) add a geofencing request
                 addGeofenceForReminder(reminderDataItem)
-                //  2) save the reminder to the local db
-                _viewModel.saveReminder(reminderDataItem)
             }
         }
     }
@@ -157,7 +157,8 @@ class SaveReminderFragment : BaseFragment() {
         if (grantResults.isEmpty()
             || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED
             || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
-                    && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)) {
+                    && grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
+                    PackageManager.PERMISSION_DENIED)) {
             
             //show explanation
             showSnackBarExplanation()
@@ -224,8 +225,6 @@ class SaveReminderFragment : BaseFragment() {
                 // Location settings are not satisfied, but this can be fixed
                 // by showing the user a dialog.
                 try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
                     startIntentSenderForResult(exception.resolution.intentSender,
                             REQUEST_TURN_DEVICE_LOCATION_ON,
                             null,
@@ -235,7 +234,7 @@ class SaveReminderFragment : BaseFragment() {
                             null)
                     
                 } catch (sendEx: IntentSender.SendIntentException) {
-                    Log.d(TAG, "Error geting location settings resolution: " + sendEx.message)
+                    Log.e(TAG, "Error geting location settings resolution: " + sendEx.message)
                 }
             } else {
                 Snackbar.make(requireView(),
@@ -257,6 +256,7 @@ class SaveReminderFragment : BaseFragment() {
     }
     
     
+    @SuppressLint("MissingPermission")
     private fun addGeofenceForReminder(reminderDataItem: ReminderDataItem) {
         if (foregroundAndBackgroundLocationPermissionApproved()) {
             //Build the geofence using the geofence builder
@@ -288,6 +288,9 @@ class SaveReminderFragment : BaseFragment() {
                             Log.w(TAG, it.message.toString())
                         }
                     }
+    
+                    // save reminder.
+                    _viewModel.saveReminder(reminderDataItem)
                 }
         } else {
             requestForegroundAndBackgroundLocationPermissions()
