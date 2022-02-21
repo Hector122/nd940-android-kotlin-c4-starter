@@ -104,7 +104,8 @@ class SaveReminderFragment : BaseFragment() {
             //  1) add a geofencing request
             //  2) save the reminder to the local db
             if (_viewModel.validateEnteredData(reminderDataItem)) {
-                addGeofenceForReminder()
+                //addGeofenceForReminder()
+                checkDeviceLocationSettingsAndStartGeofence()
             }
         }
     }
@@ -251,8 +252,7 @@ class SaveReminderFragment : BaseFragment() {
             if (it.isSuccessful) {
                 Log.d(TAG, "Successful location setting response")
                 // device location enabled
-                //addGeofenceForReminder(reminderDataItem)
-                _viewModel.saveReminder(reminderDataItem)
+                addGeofenceForReminder()
             }
         }
     }
@@ -285,8 +285,7 @@ class SaveReminderFragment : BaseFragment() {
                         Log.i(TAG, geofence.requestId)
 
                         // save reminder.
-                        checkDeviceLocationSettingsAndStartGeofence()
-                        //_viewModel.saveReminder(reminderDataItem)
+                        _viewModel.saveReminder(reminderDataItem)
                     }
                     addOnFailureListener {
                         // Failed to add geofence
